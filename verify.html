@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROverify - Verify Product</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body class="verify-body">
+    <div class="verify-bg-pattern"></div>
+
+    <main class="page-center" style="position: relative; z-index: 1">
+      <!-- Logo & tagline (same as home page) -->
+      <div class="card verify-card" style="text-align: center" id="verify-card">
+        <a
+          href="/"
+          class="logo"
+          style="font-size: 2.4rem; display: block; margin-bottom: 0.75rem"
+        >
+          <span class="logo-pro">PRO</span
+          ><span class="logo-verify">verify</span>
+        </a>
+
+        <h1 class="title" style="font-size: 1.35rem; text-align: center">
+          Product Authentication System
+        </h1>
+        <p class="subtitle" style="text-align: center; margin-bottom: 1.75rem">
+          Verify the authenticity of your protein supplements instantly.
+        </p>
+
+        <!-- Verify form -->
+        <div class="verify-form">
+          <label class="verify-form-label" for="product-code"
+            >Enter Product Code</label
+          >
+          <div class="verify-field-wrap">
+            <input
+              class="verify-field"
+              type="text"
+              id="product-code"
+              placeholder="e.g. XK9F2M7P"
+              maxlength="20"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="verify-submit" type="button" id="verify-btn">
+              <span class="verify-submit-label" id="btn-label">Verify</span>
+              <span class="verify-submit-loader" id="btn-loader"></span>
+            </button>
+          </div>
+          <p class="verify-form-hint">
+            Find the code on your product's label, cap seal, or packaging.
+          </p>
+        </div>
+      </div>
+
+      <!-- Result card -->
+      <div
+        class="card verify-card"
+        id="result-card"
+        style="text-align: center; display: none"
+      >
+        <a
+          href="index.html"
+          class="logo"
+          style="font-size: 2.4rem; display: block; margin-bottom: 1.25rem"
+        >
+          <span class="logo-pro">PRO</span
+          ><span class="logo-verify">verify</span>
+        </a>
+
+        <!-- Genuine -->
+        <div id="result-genuine" style="display: none">
+          <div class="vr-icon-wrap">
+            <div class="vr-icon-circle vr-icon-green">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#fff"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+          </div>
+          <h2 class="vr-heading vr-heading-green">Genuine Product</h2>
+          <p class="vr-text">
+            This code is verified and authentic. Your supplement is safe to use.
+          </p>
+          <div class="vr-details">
+            <div class="vr-detail-row">
+              <span class="vr-detail-label">Code</span>
+              <span class="vr-detail-val" id="genuine-code">--</span>
+            </div>
+            <div class="vr-detail-row">
+              <span class="vr-detail-label">Verified</span>
+              <span class="vr-detail-val" id="genuine-date">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invalid -->
+        <div id="result-invalid" style="display: none">
+          <div class="vr-icon-wrap">
+            <div class="vr-icon-circle vr-icon-red">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#fff"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </div>
+          <h2 class="vr-heading vr-heading-red">Code Not Found</h2>
+          <p class="vr-text">
+            This code could not be verified. The product may be counterfeit or
+            the code incorrect.
+          </p>
+          <div class="vr-details">
+            <div class="vr-detail-row">
+              <span class="vr-detail-label">Entered</span>
+              <span class="vr-detail-val" id="invalid-code">--</span>
+            </div>
+          </div>
+          <p class="vr-footnote">
+            Double-check the code. If you believe this is an error, contact the
+            manufacturer.
+          </p>
+        </div>
+
+        <button class="verify-again-btn" id="verify-again" type="button">
+          Verify Another Code
+        </button>
+      </div>
+
+      <!-- Trust + links -->
+      <div class="verify-bottom">
+        <div class="verify-trust">
+          <span class="verify-trust-item">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Secure
+          </span>
+          <span class="verify-trust-item">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            Instant
+          </span>
+          <span class="verify-trust-item">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            Tamper-Proof
+          </span>
+        </div>
+        <div class="verify-links">
+          <a href="index.html" class="verify-link">Home</a>
+          <span class="verify-links-sep">&middot;</span>
+          <a href="admin-login.html" class="verify-link">Admin</a>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const input = document.getElementById("product-code");
+      const btn = document.getElementById("verify-btn");
+      const verifyCard = document.getElementById("verify-card");
+      const resultCard = document.getElementById("result-card");
+      const resultGenuine = document.getElementById("result-genuine");
+      const resultInvalid = document.getElementById("result-invalid");
+      const verifyAgain = document.getElementById("verify-again");
+
+      async function doVerify() {
+        const code = input.value.trim().toUpperCase();
+
+        if (!code) {
+          input.classList.add("shake");
+          input.focus();
+          setTimeout(() => input.classList.remove("shake"), 500);
+          return;
+        }
+
+        btn.disabled = true;
+        btn.classList.add("is-loading");
+
+        try {
+          const response = await fetch("http://127.0.0.1:8000/api/verify/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ code: code }),
+          });
+
+          const data = await response.json();
+
+          btn.disabled = false;
+          btn.classList.remove("is-loading");
+
+          verifyCard.style.display = "none";
+          resultCard.style.display = "";
+          resultCard.classList.add("animate-in");
+          resultGenuine.style.display = "none";
+          resultInvalid.style.display = "none";
+
+          if (data.status === "genuine") {
+            document.getElementById("genuine-code").textContent = code;
+            document.getElementById("genuine-date").textContent =
+              new Date().toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+            resultGenuine.style.display = "";
+          } else if (data.status === "already_verified") {
+            document.getElementById("invalid-code").textContent = code;
+            document.querySelector("#result-invalid .vr-heading").textContent =
+              "Code Already Verified";
+            document.querySelector("#result-invalid .vr-text").textContent =
+              "This code is genuine, but it has already been verified before.";
+
+            resultInvalid.style.display = "";
+          } else {
+            document.getElementById("invalid-code").textContent = code;
+            document.querySelector("#result-invalid .vr-heading").textContent =
+              "Code Not Found";
+            document.querySelector("#result-invalid .vr-text").textContent =
+              "This code could not be verified. The product may be counterfeit or the code incorrect.";
+
+            resultInvalid.style.display = "";
+          }
+
+          setTimeout(() => resultCard.classList.remove("animate-in"), 600);
+        } catch (error) {
+          btn.disabled = false;
+          btn.classList.remove("is-loading");
+          alert("Backend server is not running or API error");
+          console.log(error);
+        }
+      }
+
+      btn.addEventListener("click", doVerify);
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") doVerify();
+      });
+
+      verifyAgain.addEventListener("click", () => {
+        resultCard.style.display = "none";
+        verifyCard.style.display = "";
+        resultGenuine.style.display = "none";
+        resultInvalid.style.display = "none";
+        input.value = "";
+        input.focus();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROverify - Upload Codes</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <script>
+      const token = localStorage.getItem("access_token");
+      if (!token) { window.location.href = "/admin-login/"; }
+    </script>
+
+    <header class="header">
+      <a href="/" class="logo">
+        <span class="logo-pro">PRO</span><span class="logo-verify">verify</span>
+      </a>
+      <nav class="header-nav">
+        <span class="admin-user">admin@proverify.com</span>
+        <a href="#" onclick="logoutAdmin()">Logout</a>
+        <a href="/">Home</a>
+      </nav>
+    </header>
+
+    <div class="page-content">
+      <div>
+        <a href="/admin-dashboard/" class="back-link">&larr; Back to Dashboard</a>
+        <h1 class="title" style="margin-top: 0.5rem">Upload New Codes</h1>
+        <p class="subtitle">Add product authentication codes in bulk via CSV or Excel file</p>
+      </div>
+
+      <!-- Upload Form -->
+      <section class="card card-wide">
+        <h2 class="section-title">Code Input</h2>
+        <div class="upload-grid">
+          <div>
+            <div class="form-group">
+              <label class="form-label" for="codeFile">Upload CSV / Excel File</label>
+              <div class="file-drop-zone" onclick="document.getElementById('codeFile').click()" style="cursor:pointer;">
+                <div class="file-drop-icon">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+                    stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                </div>
+                <p class="file-drop-text">Drag & drop your file here, or click to browse</p>
+                <p class="form-note">Accepts .csv and .xlsx files</p>
+                <input class="file-drop-input" type="file" id="codeFile" accept=".csv,.xlsx"
+                  onchange="showSelectedFile()" style="display:none;" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">File Selected</label>
+              <p class="file-name" id="selectedFileName">No file selected</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="bulk-codes">Bulk Code Input (optional)</label>
+            <textarea class="form-textarea" id="bulk-codes"
+              placeholder="Paste codes here, one per line..." rows="8"></textarea>
+            <p class="form-note">Supports up to 1 lakh alphanumeric codes. A-Z, 0-9 only.</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.5rem; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <button class="btn btn-primary" type="button" id="uploadBtn" onclick="uploadCodes()">
+            Upload Codes
+          </button>
+          <a href="/static/sample-codes.csv" download class="btn btn-accent">Download Sample File</a>
+          <span id="uploadStatus" style="color:#0b6b22;font-weight:600;"></span>
+        </div>
+      </section>
+
+      <!-- Upload Report — hidden until upload succeeds -->
+      <section class="card card-wide" id="uploadReport" style="display:none;">
+        <div class="report-header">
+          <div class="report-icon report-icon-success">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="#1b5e20" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="section-title" style="margin-bottom:0.15rem">Upload Successful</h2>
+            <p class="subtitle" style="margin-bottom:0" id="reportTime">Batch processed successfully</p>
+          </div>
+        </div>
+
+        <div class="report-stats">
+          <div class="report-stat-card">
+            <span class="report-stat-value" id="reportTotal">0</span>
+            <span class="report-stat-label">Total Codes Submitted</span>
+          </div>
+          <div class="report-stat-card report-stat-success">
+            <span class="report-stat-value" id="reportUploaded">0</span>
+            <span class="report-stat-label">Successfully Uploaded</span>
+          </div>
+          <div class="report-stat-card report-stat-warn">
+            <span class="report-stat-value" id="reportDuplicates">0</span>
+            <span class="report-stat-label">Duplicates Skipped</span>
+          </div>
+          <div class="report-stat-card report-stat-error">
+            <span class="report-stat-value" id="reportInvalid">0</span>
+            <span class="report-stat-label">Invalid Format</span>
+          </div>
+        </div>
+
+        <div class="report-details">
+          <h3 class="report-details-title">Upload Summary</h3>
+          <div class="report-table-wrap">
+            <table>
+              <tbody>
+                <tr>
+                  <td class="report-label">Batch ID</td>
+                  <td><code class="code-tag" id="reportBatchId">—</code></td>
+                </tr>
+                <tr>
+                  <td class="report-label">Source File</td>
+                  <td id="reportFileName">—</td>
+                </tr>
+                <tr>
+                  <td class="report-label">Upload Time</td>
+                  <td id="reportUploadTime">—</td>
+                </tr>
+                <tr>
+                  <td class="report-label">Status</td>
+                  <td><span class="badge badge-success">Complete</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="report-actions">
+          <a href="/admin-dashboard/" class="btn btn-primary">Go to Dashboard</a>
+          <button class="btn btn-accent" type="button" onclick="resetUploadForm()">Upload More Codes</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast" style="position:fixed;top:20px;right:20px;background:#111;color:white;padding:12px 18px;border-radius:8px;display:none;z-index:9999;"></div>
+
+    <script>
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.background = type === "success" ? "#1b5e20" : "#b71c1c";
+        toast.style.display = "block";
+        setTimeout(() => { toast.style.display = "none"; }, 4000);
+      }
+
+      function showSelectedFile() {
+        const fileInput = document.getElementById("codeFile");
+        const label = document.getElementById("selectedFileName");
+        label.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : "No file selected";
+      }
+
+      function resetUploadForm() {
+        document.getElementById("uploadReport").style.display = "none";
+        document.getElementById("codeFile").value = "";
+        document.getElementById("selectedFileName").textContent = "No file selected";
+        document.getElementById("bulk-codes").value = "";
+        document.getElementById("uploadStatus").textContent = "";
+        const btn = document.getElementById("uploadBtn");
+        btn.disabled = false;
+        btn.textContent = "Upload Codes";
+      }
+
+      async function uploadCodes() {
+        const token = localStorage.getItem("access_token");
+
+        if (!token) {
+          showToast("Please login first", "error");
+          window.location.href = "/admin-login/";
+          return;
+        }
+
+        const fileInput = document.getElementById("codeFile");
+        if (!fileInput.files.length) {
+          showToast("Please select a CSV or Excel file", "error");
+          return;
+        }
+
+        const uploadBtn = document.getElementById("uploadBtn");
+        const uploadStatus = document.getElementById("uploadStatus");
+
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = "Uploading...";
+        uploadStatus.textContent = "Uploading file, please wait...";
+        uploadStatus.style.color = "#0b6b22";
+
+        // Hide previous report
+        document.getElementById("uploadReport").style.display = "none";
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        try {
+          const response = await fetch("/api/codes/upload/", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              // Do NOT set Content-Type — browser sets it for FormData
+            },
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Populate and show the report section
+            const now = new Date().toLocaleString("en-IN");
+            document.getElementById("reportTotal").textContent = data.total_codes.toLocaleString();
+            document.getElementById("reportUploaded").textContent = data.uploaded_codes.toLocaleString();
+            document.getElementById("reportDuplicates").textContent = data.duplicate_codes.toLocaleString();
+            document.getElementById("reportInvalid").textContent = data.invalid_codes.toLocaleString();
+            document.getElementById("reportBatchId").textContent = "BATCH-" + data.batch_id;
+            document.getElementById("reportFileName").textContent = fileInput.files[0].name;
+            document.getElementById("reportUploadTime").textContent = now;
+            document.getElementById("reportTime").textContent = "Batch processed on " + now;
+            document.getElementById("uploadReport").style.display = "block";
+
+            uploadStatus.textContent = "Upload completed successfully!";
+            showToast(`Success! ${data.uploaded_codes.toLocaleString()} codes uploaded.`, "success");
+
+            document.getElementById("uploadReport").scrollIntoView({ behavior: "smooth" });
+
+          } else if (response.status === 401) {
+            showToast("Session expired. Please login again.", "error");
+            setTimeout(() => { window.location.href = "/admin-login/"; }, 2000);
+            uploadStatus.textContent = "";
+          } else {
+            uploadStatus.textContent = "Upload failed.";
+            uploadStatus.style.color = "#b71c1c";
+            showToast(data.error || "Upload failed. Please try again.", "error");
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = "Upload Codes";
+          }
+
+        } catch (err) {
+          console.error("Upload error:", err);
+          uploadStatus.textContent = "Connection error. Is the server running?";
+          uploadStatus.style.color = "#b71c1c";
+          showToast("Upload failed: " + err.message, "error");
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = "Upload Codes";
+        }
+      }
+
+      function logoutAdmin() {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "/admin-login/";
+      }
+    </script>
+  </body>
+</html>

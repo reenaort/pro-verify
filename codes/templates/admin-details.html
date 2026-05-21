@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROverify - Authentication Details</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <script>
+      const token = localStorage.getItem("access_token");
+      if (!token) { window.location.href = "/admin-login/"; }
+    </script>
+
+    <header class="header">
+      <a href="/" class="logo">
+        <span class="logo-pro">PRO</span><span class="logo-verify">verify</span>
+      </a>
+      <nav class="header-nav">
+        <span class="admin-user">admin@proverify.com</span>
+        <a href="#" onclick="logoutAdmin()">Logout</a>
+        <a href="/">Home</a>
+      </nav>
+    </header>
+
+    <div class="page-content">
+      <div>
+        <a href="/admin-dashboard/" class="back-link">&larr; Back to Dashboard</a>
+        <h1 class="title" style="margin-top:0.5rem">Authentication Details</h1>
+        <p class="subtitle" id="detailsSubtitle">Loading batch details...</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-value" id="detailTotalScans">—</span>
+          <span class="stat-label">Total Authentications</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="detailTotalCodes">—</span>
+          <span class="stat-label">Total Codes in Batch</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="detailUploadDate">—</span>
+          <span class="stat-label">Upload Date</span>
+        </div>
+      </div>
+
+      <section class="card card-wide">
+        <div class="section-header-row">
+          <h2 class="section-title" style="margin-bottom:0">Authenticated Codes</h2>
+          <span class="form-note" id="detailsCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Product Code</th>
+                <th>Verified At</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="detailsTable">
+              <tr><td colspan="4" style="text-align:center;padding:24px;color:#888;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast" style="position:fixed;top:20px;right:20px;background:#111;color:white;padding:12px 18px;border-radius:8px;display:none;z-index:9999;"></div>
+
+    <script>
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.background = type === "success" ? "#1b5e20" : "#b71c1c";
+        toast.style.display = "block";
+        setTimeout(() => { toast.style.display = "none"; }, 3000);
+      }
+
+      async function loadDetails() {
+        const token = localStorage.getItem("access_token");
+        const params = new URLSearchParams(window.location.search);
+        const batchId = params.get("batch_id");
+
+        try {
+          // Load all codes filtered by batch
+          const url = batchId ? `/api/codes/?batch_id=${batchId}` : "/api/codes/";
+          const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (response.status === 401) {
+            window.location.href = "/admin-login/";
+            return;
+          }
+
+          const codes = await response.json();
+          const usedCodes = codes.filter(c => c.is_used);
+
+          document.getElementById("detailTotalScans").textContent = usedCodes.length.toLocaleString();
+          document.getElementById("detailTotalCodes").textContent = codes.length.toLocaleString();
+          document.getElementById("detailsCount").textContent = `${usedCodes.length} authenticated codes`;
+
+          if (codes.length > 0) {
+            const uploadDate = new Date(codes[0].created_at).toLocaleDateString("en-IN");
+            document.getElementById("detailUploadDate").textContent = uploadDate;
+          }
+
+          if (batchId) {
+            document.getElementById("detailsSubtitle").textContent = `Batch ID: ${batchId}`;
+          }
+
+          const tbody = document.getElementById("detailsTable");
+          if (usedCodes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:24px;color:#888;">No authentications yet for this batch.</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = usedCodes.map((item, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td><code class="code-tag">${item.code}</code></td>
+              <td>${item.verified_at ? new Date(item.verified_at).toLocaleString("en-IN") : "—"}</td>
+              <td><span class="badge badge-success">Genuine</span></td>
+            </tr>
+          `).join('');
+
+        } catch (err) {
+          showToast("Failed to load details", "error");
+        }
+      }
+
+      function logoutAdmin() {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "/admin-login/";
+      }
+
+      loadDetails();
+    </script>
+  </body>
+</html>

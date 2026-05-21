@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROverify - Admin Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <script>
+      const token = localStorage.getItem("access_token");
+
+      if (!token) {
+        window.location.href = "admin-login.html";
+      }
+    </script>
+    <header class="header">
+      <a href="index.html" class="logo">
+        <span class="logo-pro">PRO</span><span class="logo-verify">verify</span>
+      </a>
+      <nav class="header-nav">
+        <span class="admin-user">admin@proverify.com</span>
+        <a href="#" onclick="logoutAdmin()">Logout</a>
+        <a href="index.html">Home</a>
+      </nav>
+    </header>
+
+    <div class="page-content">
+      <!-- Dashboard Header -->
+      <div class="dashboard-header dashboard-header-row">
+        <div>
+          <h1 class="title">Admin Dashboard</h1>
+          <p class="subtitle">
+            Manage product codes and view authentication activity
+          </p>
+        </div>
+        <a href="/admin-upload/" class="btn btn-primary"
+          >+ Upload New Codes</a
+        >
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-value" id="totalCodes">0</span>
+          <span class="stat-label">Total Codes Uploaded</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="totalAuthentications">0</span>
+          <span class="stat-label">Total Authentications</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="totalBatches">0</span>
+          <span class="stat-label">Upload Batches</span>
+        </div>
+      </div>
+
+      <!-- Uploaded Codes Table -->
+      <section class="card card-wide">
+        <div class="section-header-row">
+          <h2 class="section-title" style="margin-bottom: 0">Uploaded Codes</h2>
+          <a href="admin-codes.html" class="btn btn-small btn-accent"
+            >View All Codes</a
+          >
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Upload Date</th>
+                <th>Batch Name</th>
+                <th>Codes Uploaded</th>
+                <th>Auth Count</th>
+                <th>Last Authenticated</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>01 May 2026</td>
+                <td>BATCH-2026-MAY</td>
+                <td>12,500</td>
+                <td>
+                  <a href="admin-details.html" class="link-count">3,842</a>
+                </td>
+                <td>05 May 2026, 14:23</td>
+                <td>
+                  <a href="admin-details.html" class="btn btn-small btn-accent"
+                    >View</a
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>18 Apr 2026</td>
+                <td>BATCH-2026-APR2</td>
+                <td>8,000</td>
+                <td>
+                  <a href="admin-details.html" class="link-count">6,210</a>
+                </td>
+                <td>04 May 2026, 09:17</td>
+                <td>
+                  <a href="admin-details.html" class="btn btn-small btn-accent"
+                    >View</a
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>02 Apr 2026</td>
+                <td>BATCH-2026-APR1</td>
+                <td>25,000</td>
+                <td>
+                  <a href="admin-details.html" class="link-count">14,790</a>
+                </td>
+                <td>03 May 2026, 22:05</td>
+                <td>
+                  <a href="admin-details.html" class="btn btn-small btn-accent"
+                    >View</a
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>15 Mar 2026</td>
+                <td>BATCH-2026-MAR</td>
+                <td>5,200</td>
+                <td>
+                  <a href="admin-details.html" class="link-count">4,980</a>
+                </td>
+                <td>02 May 2026, 18:41</td>
+                <td>
+                  <a href="admin-details.html" class="btn btn-small btn-accent"
+                    >View</a
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <script>
+      async function loadDashboardStats() {
+        const token = localStorage.getItem("access_token");
+
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/dashboard/stats/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const data = await response.json();
+
+        document.getElementById("totalCodes").textContent = data.total_codes;
+        document.getElementById("totalAuthentications").textContent =
+          data.total_authentications;
+        document.getElementById("totalBatches").textContent =
+          data.total_batches;
+      }
+
+      function logoutAdmin() {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "admin-login.html";
+      }
+
+      loadDashboardStats();
+    </script>
+  </body>
+</html>

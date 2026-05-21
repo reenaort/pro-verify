@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROverify - Upload Codes</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <a href="index.html" class="logo">
+        <span class="logo-pro">PRO</span><span class="logo-verify">verify</span>
+      </a>
+      <nav class="header-nav">
+        <span class="admin-user">admin@proverify.com</span>
+        <a href="admin-login.html" class="btn-logout">Logout</a>
+        <a href="index.html">Home</a>
+      </nav>
+    </header>
+
+    <div class="page-content">
+      <!-- Page header with back link -->
+      <div>
+        <a href="/admin-dashboard/" class="back-link">&larr; Back to Dashboard</a>
+        <h1 class="title" style="margin-top: 0.5rem">Upload New Codes</h1>
+        <p class="subtitle">
+          Add product authentication codes in bulk via file or text input
+        </p>
+      </div>
+
+      <!-- Upload Form -->
+      <section class="card card-wide">
+        <h2 class="section-title">Code Input</h2>
+
+        <div class="upload-grid">
+          <div>
+            <div class="form-group">
+              <label class="form-label" for="csv-upload"
+                >Upload CSV / Text File</label
+              >
+              <div class="file-drop-zone">
+                <div class="file-drop-icon">
+                  <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#4caf50"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                </div>
+                <p class="file-drop-text">
+                  Drag & drop your file here, or click to browse
+                </p>
+                <p class="form-note">Accepts .csv and .txt files</p>
+                <input
+                  class="file-drop-input"
+                  type="file"
+                  id="codeFile"
+                  accept=".csv,.xlsx"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">File Selected</label>
+              <p class="file-name">sample_codes_may2026.csv</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="bulk-codes">Bulk Code Input</label>
+            <textarea
+              class="form-textarea"
+              id="bulk-codes"
+              placeholder="Paste codes here, one per line..."
+              rows="8"
+            ></textarea>
+            <p class="form-note">
+              Supports up to 1 lakh alphanumeric codes. Codes must be A-Z, 0-9
+              only.
+            </p>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.5rem">
+          <button class="btn btn-primary" type="button" onclick="uploadCodes()">
+            Upload Codes
+          </button>
+        </div>
+      </section>
+
+      <!-- Upload Report -->
+      <section class="card card-wide">
+        <div class="report-header">
+          <div class="report-icon report-icon-success">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#1b5e20"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="section-title" style="margin-bottom: 0.15rem">
+              Upload Successful
+            </h2>
+            <p class="subtitle" style="margin-bottom: 0">
+              Batch processed on 06 May 2026 at 10:34 AM
+            </p>
+          </div>
+        </div>
+
+        <!-- Stats cards -->
+        <div class="report-stats">
+          <div class="report-stat-card">
+            <span class="report-stat-value">12,500</span>
+            <span class="report-stat-label">Total Codes Submitted</span>
+          </div>
+          <div class="report-stat-card report-stat-success">
+            <span class="report-stat-value">12,340</span>
+            <span class="report-stat-label">Successfully Uploaded</span>
+          </div>
+          <div class="report-stat-card report-stat-warn">
+            <span class="report-stat-value">142</span>
+            <span class="report-stat-label">Duplicates Skipped</span>
+          </div>
+          <div class="report-stat-card report-stat-error">
+            <span class="report-stat-value">18</span>
+            <span class="report-stat-label">Invalid Format</span>
+          </div>
+        </div>
+
+        <!-- Summary table -->
+        <div class="report-details">
+          <h3 class="report-details-title">Upload Summary</h3>
+          <div class="report-table-wrap">
+            <table>
+              <tbody>
+                <tr>
+                  <td class="report-label">Batch ID</td>
+                  <td><code class="code-tag">BATCH-2026-MAY-06</code></td>
+                </tr>
+                <tr>
+                  <td class="report-label">Source File</td>
+                  <td>sample_codes_may2026.csv</td>
+                </tr>
+                <tr>
+                  <td class="report-label">Upload Time</td>
+                  <td>06 May 2026, 10:34:12 AM</td>
+                </tr>
+                <tr>
+                  <td class="report-label">Processing Duration</td>
+                  <td>2.4 seconds</td>
+                </tr>
+                <tr>
+                  <td class="report-label">Code Format</td>
+                  <td>Alphanumeric (8 characters)</td>
+                </tr>
+                <tr>
+                  <td class="report-label">Status</td>
+                  <td><span class="badge badge-success">Complete</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sample codes -->
+        <div class="report-details" style="margin-top: 1.25rem">
+          <h3 class="report-details-title">Sample Codes (first 10)</h3>
+          <div class="code-grid">
+            <span class="code-tag">XK9F2M7P</span>
+            <span class="code-tag">QW3R8T1N</span>
+            <span class="code-tag">LP5V0A4E</span>
+            <span class="code-tag">MN7G3H9J</span>
+            <span class="code-tag">BT2K6Y8D</span>
+            <span class="code-tag">RF4C1W0Z</span>
+            <span class="code-tag">DJ8E5U3S</span>
+            <span class="code-tag">HV6N0L2Q</span>
+            <span class="code-tag">WY1P7X9A</span>
+            <span class="code-tag">TG5M8R2F</span>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="report-actions">
+          <a href="admin.html" class="btn btn-primary">Back to Dashboard</a>
+          <button class="btn btn-accent" type="button">
+            Upload More Codes
+          </button>
+        </div>
+      </section>
+    </div>
+    <script>
+      async function uploadCodes() {
+        const token = localStorage.getItem("access_token");
+
+        const fileInput = document.getElementById("codeFile");
+
+        if (!token) {
+          alert("Please login first");
+
+          window.location.href = "admin-login.html";
+
+          return;
+        }
+
+        if (!fileInput.files.length) {
+          alert("Please select a CSV or Excel file");
+
+          return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("file", fileInput.files[0]);
+
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/codes/upload/",
+          {
+            method: "POST",
+
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+
+            body: formData,
+          },
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert(
+            `Upload successful!
+Total Codes: ${data.total_codes}
+Uploaded Codes: ${data.uploaded_codes}
+Duplicate Codes: ${data.duplicate_codes}
+Invalid Codes: ${data.invalid_codes}`,
+          );
+        } else {
+          alert(data.error || "Upload failed");
+        }
+      }
+    </script>
+    <script>
+      function logoutAdmin() {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "admin-login.html";
+      }
+    </script>
+  </body>
+</html>

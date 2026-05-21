@@ -1,0 +1,151 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROverify - Admin Login</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}" />
+  </head>
+  <body>
+    <div class="login-page">
+      <!-- Left: Background panel -->
+      <div class="login-hero">
+        <div class="login-hero-overlay"></div>
+        <div class="login-hero-content">
+          <div class="logo" style="font-size: 2.6rem; margin-bottom: 1rem">
+            <span class="logo-pro" style="color: #fff">PRO</span
+            ><span class="logo-verify">verify</span>
+          </div>
+          <h2 class="login-hero-title">
+            Protect Your Brand. Empower Your Customers.
+          </h2>
+          <p class="login-hero-subtitle">
+            The trusted product authentication platform for protein supplement
+            manufacturers. Verify authenticity, track scans, and fight
+            counterfeiting -- all from one dashboard.
+          </p>
+          <div class="login-hero-stats">
+            <div class="login-hero-stat">
+              <span class="login-hero-stat-value">50K+</span>
+              <span class="login-hero-stat-label">Codes Protected</span>
+            </div>
+            <div class="login-hero-stat">
+              <span class="login-hero-stat-value">29K+</span>
+              <span class="login-hero-stat-label">Scans Completed</span>
+            </div>
+            <div class="login-hero-stat">
+              <span class="login-hero-stat-value">99.9%</span>
+              <span class="login-hero-stat-label">Uptime</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Login form -->
+      <div class="login-form-panel">
+        <a href="index.html" class="login-home-link">&larr; Back to Home</a>
+
+        <div class="login-form-wrap">
+          <div style="text-align: center; margin-bottom: 2rem">
+            <div class="logo" style="font-size: 2rem; margin-bottom: 0.5rem">
+              <span class="logo-pro">PRO</span
+              ><span class="logo-verify">verify</span>
+            </div>
+            <h1 class="title" style="font-size: 1.2rem; text-align: center">
+              Admin Login
+            </h1>
+            <p class="subtitle" style="text-align: center">
+              Sign in to access the admin dashboard
+            </p>
+          </div>
+
+          <form onsubmit="loginAdmin(event)" class="login-form">
+            <div class="form-group">
+              <label class="form-label" for="username">Username</label>
+              <input
+                class="form-input"
+                type="text"
+                id="username"
+                placeholder="Enter username"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="password">Password</label>
+              <input
+                class="form-input"
+                type="password"
+                id="password"
+                placeholder="Enter password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              style="display: block; width: 100%; text-align: center"
+            >
+              Sign In
+            </button>
+          </form>
+
+          <p
+            style="
+              text-align: center;
+              margin-top: 1.5rem;
+              font-size: 0.82rem;
+              color: #888;
+            "
+          >
+            Authorized personnel only. Contact support for access.
+          </p>
+        </div>
+      </div>
+    </div>
+    <script>
+      async function loginAdmin(event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value;
+
+        const password = document.getElementById("password").value;
+
+        const response = await fetch("http://127.0.0.1:8000/api/auth/login/", {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            username: username,
+            password: password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem("access_token", data.access);
+
+          localStorage.setItem("refresh_token", data.refresh);
+
+          alert("Login successful");
+
+          window.location.href = "/admin-dashboard/";
+        } else {
+          alert("Invalid username or password");
+        }
+      }
+    </script>
+    <script>
+      function logoutAdmin() {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "admin-login.html";
+      }
+    </script>
+  </body>
+</html>

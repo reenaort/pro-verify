@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROverify - Admin Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <script>
+      const token = localStorage.getItem("access_token");
+      if (!token) { window.location.href = "/admin-login/"; }
+    </script>
+
+    <header class="header">
+      <a href="/" class="logo">
+        <span class="logo-pro">PRO</span><span class="logo-verify">verify</span>
+      </a>
+      <nav class="header-nav">
+        <span class="admin-user">admin@proverify.com</span>
+        <a href="#" onclick="logoutAdmin()">Logout</a>
+        <a href="/">Home</a>
+      </nav>
+    </header>
+
+    <div class="page-content">
+      <div class="dashboard-header dashboard-header-row">
+        <div>
+          <h1 class="title">Admin Dashboard</h1>
+          <p class="subtitle">Manage product codes and view authentication activity</p>
+        </div>
+        <a href="/admin-upload/" class="btn btn-primary">+ Upload New Codes</a>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-value" id="totalCodes">—</span>
+          <span class="stat-label">Total Codes Uploaded</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="totalAuthentications">—</span>
+          <span class="stat-label">Total Authentications</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="totalBatches">—</span>
+          <span class="stat-label">Upload Batches</span>
+        </div>
+      </div>
+
+      <section class="card card-wide">
+        <div class="section-header-row">
+          <h2 class="section-title" style="margin-bottom: 0">Uploaded Codes</h2>
+          <a href="/admin-codes/" class="btn btn-small btn-accent">View All Codes</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Upload Date</th>
+                <th>Batch Name</th>
+                <th>Codes Uploaded</th>
+                <th>Auth Count</th>
+                <th>Last Authenticated</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="batchTableBody">
+              <tr>
+                <td colspan="6" style="text-align:center;padding:24px;color:#888;">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast" style="position:fixed;top:20px;right:20px;background:#111;color:white;padding:12px 18px;border-radius:8px;display:none;z-index:9999;"></div>
+
+    <script>
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.background = type === "success" ? "#1b5e20" : "#b71c1c";
+        toast.style.display = "block";
+        setTimeout(() => { toast.style.display = "none"; }, 3000);
+      }
+
+      async function loadDashboardStats() {
+        const token = localStorage.getItem("access_token");
+        try {
+          const response = await fetch("/api/dashboard/stats/", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (response.status === 401) {
+            showToast("Session expired. Please login again.", "error");
+            setTimeout(() => { window.location.href = "/admin-login/"; }, 2000);
+            return;
+          }
+
+          const data = await response.json();
+
+          document.getElementById("totalCodes").textContent = data.total_codes.toLocaleString();
+          document.getElementById("totalAuthentications").textContent = data.total_authentications.toLocaleString();
+          document.getElementById("totalBatches").textContent = data.total_batches.toLocaleString();
+
+          const tbody = document.getElementById("batchTableBody");
+
+          if (!data.batches || data.batches.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#888;">
+              No batches uploaded yet. <a href="/admin-upload/" style="color:#4caf50;">Upload your first batch</a>
+            </td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = data.batches.map(batch => `
+            <tr>
+              <td>${batch.uploaded_at}</td>
+              <td>${batch.file_name}</td>
+              <td>${batch.uploaded_codes.toLocaleString()}</td>
+              <td><a href="/admin-details/?batch_id=${batch.id}" class="link-count">${batch.auth_count.toLocaleString()}</a></td>
+              <td>${batch.last_authenticated}</td>
+              <td><a href="/admin-details/?batch_id=${batch.id}" class="btn btn-small btn-accent">View</a></td>
+            </tr>
+          `).join('');
+
+        } catch (err) {
+          console.error("Dashboard load error:", err);
+          showToast("Failed to load dashboard data.", "error");
+          document.getElementById("batchTableBody").innerHTML = `
+            <tr><td colspan="6" style="text-align:center;padding:20px;color:#c00;">
+              Failed to load data. Please refresh.
+            </td></tr>`;
+        }
+      }
+
+      function logoutAdmin() {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "/admin-login/";
+      }
+
+      loadDashboardStats();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROverify - All Codes</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <script>
+      const token = localStorage.getItem("access_token");
+      if (!token) { window.location.href = "/admin-login/"; }
+    </script>
+
+    <header class="header">
+      <a href="/" class="logo">
+        <span class="logo-pro">PRO</span><span class="logo-verify">verify</span>
+      </a>
+      <nav class="header-nav">
+        <span class="admin-user">admin@proverify.com</span>
+        <a href="#" onclick="logoutAdmin()">Logout</a>
+        <a href="/">Home</a>
+      </nav>
+    </header>
+
+    <div class="page-content">
+      <div>
+        <a href="/admin-dashboard/" class="back-link">&larr; Back to Dashboard</a>
+        <h1 class="title" style="margin-top:0.5rem">All Uploaded Codes</h1>
+        <p class="subtitle">Browse, search, and view authentication details for every product code</p>
+      </div>
+
+      <section class="card card-wide">
+        <div class="filter-bar">
+          <div class="filter-search">
+            <svg class="filter-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input class="filter-input" type="text" id="searchInput"
+              placeholder="Search by code..." oninput="filterCodes()" />
+          </div>
+          <div class="filter-group">
+            <select class="filter-select" id="statusFilter" onchange="filterCodes()">
+              <option value="">All Statuses</option>
+              <option value="used">Verified</option>
+              <option value="unused">Unverified</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card-wide">
+        <div class="section-header-row">
+          <h2 class="section-title" style="margin-bottom:0">Product Codes</h2>
+          <span class="form-note" id="codesCount">Loading...</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Product Code</th>
+                <th>Batch</th>
+                <th>Upload Date</th>
+                <th>Scan Count</th>
+                <th>Last Scanned</th>
+              </tr>
+            </thead>
+            <tbody id="codesTable">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:#888;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast" style="position:fixed;top:20px;right:20px;background:#111;color:white;padding:12px 18px;border-radius:8px;display:none;z-index:9999;"></div>
+
+    <script>
+      let allCodes = [];
+
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.background = type === "success" ? "#1b5e20" : "#b71c1c";
+        toast.style.display = "block";
+        setTimeout(() => { toast.style.display = "none"; }, 3000);
+      }
+
+      function filterCodes() {
+        const search = document.getElementById("searchInput").value.toLowerCase();
+        const status = document.getElementById("statusFilter").value;
+        const filtered = allCodes.filter(item => {
+          const matchSearch = item.code.toLowerCase().includes(search);
+          const matchStatus = !status ||
+            (status === "used" && item.is_used) ||
+            (status === "unused" && !item.is_used);
+          return matchSearch && matchStatus;
+        });
+        renderCodes(filtered);
+      }
+
+      function renderCodes(codes) {
+        const table = document.getElementById("codesTable");
+        document.getElementById("codesCount").textContent = `Showing ${codes.length} codes`;
+        if (codes.length === 0) {
+          table.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:#888;">No codes found.</td></tr>`;
+          return;
+        }
+        table.innerHTML = codes.map((item, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td><code class="code-tag">${item.code}</code></td>
+            <td>${item.batch}</td>
+            <td>${new Date(item.created_at).toLocaleDateString("en-IN")}</td>
+            <td>${item.is_used ? 1 : 0}</td>
+            <td>${item.verified_at ? new Date(item.verified_at).toLocaleString("en-IN") : "—"}</td>
+          </tr>
+        `).join('');
+      }
+
+      async function loadCodes() {
+        const token = localStorage.getItem("access_token");
+        try {
+          const response = await fetch("/api/codes/", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (response.status === 401) {
+            window.location.href = "/admin-login/";
+            return;
+          }
+          allCodes = await response.json();
+          renderCodes(allCodes);
+        } catch (err) {
+          showToast("Failed to load codes", "error");
+          document.getElementById("codesTable").innerHTML =
+            `<tr><td colspan="6" style="text-align:center;padding:24px;color:#c00;">Failed to load data.</td></tr>`;
+        }
+      }
+
+      function logoutAdmin() {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "/admin-login/";
+      }
+
+      loadCodes();
+    </script>
+  </body>
+</html>
