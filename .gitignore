@@ -1,4 +1,9 @@
-<<<<<<< HEAD
+env/
+__pycache__/
+*.pyc
+db.sqlite3
+node_modules/
+.vscode/<<<<<<< HEAD
 # Logs
 logs
 *.log
